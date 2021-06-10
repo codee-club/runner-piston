@@ -1,0 +1,29 @@
+GET http://localhost:2000/api HTTP/1.1
+
+###
+
+POST http://localhost:2000/api/java-15.0.2 HTTP/1.1
+content-type: application/json
+
+{
+  "sourceRefs": ["gs://codee-club-emu.appspot.com/submissions/1T3vqd8FWY9YBQvzkequ/8wzQYnLPKY8wpCdcedmk/7oNONzaJki6HM1h5LiDI/EWl4s4W7GUL22ccD3vo0/Example2Success.java"],
+  "inputs": {
+    "1": "hello THERE",
+    "2": "aBcDeF"
+  }
+}
+
+###
+
+POST http://localhost:2000/api/java-15.0.2 HTTP/1.1
+content-type: application/json
+
+{
+  "sourceRefs": ["gs://codee-club-emu.appspot.com/submissions/1T3vqd8FWY9YBQvzkequ/8wzQYnLPKY8wpCdcedmk/7oNONzaJki6HM1h5LiDI/EWl4s4W7GUL22ccD3vo0/Example2Success.java"],
+  "inputs": {
+    "1": "hello THERE",
+    "2": "aBcDeF"
+  }
+}
+
+###
