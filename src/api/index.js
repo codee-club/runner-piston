@@ -93,7 +93,9 @@ async function runSingle(jobParams) {
 }
 
 function capitalize(name) {
-    return (name.charAt(0).toUpperCase() + name.slice(1)).replace('script', 'Script')
+    return (name.charAt(0).toUpperCase() + name.slice(1))
+        .replace('script', 'Script')
+        .replace('Php', 'PHP')
 }
 
 module.exports = router
