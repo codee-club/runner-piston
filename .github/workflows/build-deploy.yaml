@@ -11,11 +11,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - name: 'Setup: Node'
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-
       - name: 'Setup: Git checkout'
         uses: actions/checkout@v2
 
@@ -32,11 +27,11 @@ jobs:
             {
               "master": {
                 "SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY": "PROD_GCP_SERVICE_ACCOUNT_KEY",
-                "SECRET_NAME_FIREBASE_PROJECT_ID": "PROD_FIREBASE_PROJECT_ID"
+                "SECRET_NAME_GCP_PROJECT_ID": "PROD_GCP_PROJECT_ID"
               },
               "develop": {
                 "SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY": "DEV_GCP_SERVICE_ACCOUNT_KEY",
-                "SECRET_NAME_FIREBASE_PROJECT_ID": "DEV_FIREBASE_PROJECT_ID"
+                "SECRET_NAME_GCP_PROJECT_ID": "DEV_GCP_PROJECT_ID"
               }
             }
 
@@ -58,8 +53,8 @@ jobs:
         with:
           push: true
           tags: |
-            gcr.io/${{ secrets[env.SECRET_NAME_FIREBASE_PROJECT_ID] }}/runner-piston:latest
-            gcr.io/${{ secrets[env.SECRET_NAME_FIREBASE_PROJECT_ID] }}/runner-piston:${{ github.run_number }}
+            gcr.io/${{ secrets[env.SECRET_NAME_GCP_PROJECT_ID] }}/runner-piston:latest
+            gcr.io/${{ secrets[env.SECRET_NAME_GCP_PROJECT_ID] }}/runner-piston:${{ github.run_number }}
 
       - name: 'Deploy: Wait at turnstile'
         uses: softprops/turnstyle@v1
@@ -72,4 +67,4 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@main
         with:
           service: runner-piston
-          image: gcr.io/${{ secrets[env.SECRET_NAME_FIREBASE_PROJECT_ID] }}/runner-piston:${{ github.run_number }}
+          image: gcr.io/${{ secrets[env.SECRET_NAME_GCP_PROJECT_ID] }}/runner-piston:${{ github.run_number }}
