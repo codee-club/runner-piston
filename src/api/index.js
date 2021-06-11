@@ -21,15 +21,13 @@ router.use((req, res, next) => {
 })
 
 router.get('/', (req, res) => {
-    const runtimes = runtime.map(rt => {
-        return {
-            name: capitalize(rt.language),
-            version: rt.version.raw,
-            path: `/${rt.language}-${rt.version.raw}`
-        }
-    })
+    const languages = runtime.map(rt => ({
+        name: capitalize(rt.language),
+        version: rt.version.raw,
+        path: `/${rt.language}-${rt.version.raw}`
+    }))
 
-    return res.status(200).send(runtimes)
+    res.json({ languages })
 })
 
 
