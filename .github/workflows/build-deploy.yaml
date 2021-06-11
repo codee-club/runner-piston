@@ -27,11 +27,14 @@ jobs:
             {
               "master": {
                 "SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY": "PROD_GCP_SERVICE_ACCOUNT_KEY",
-                "SECRET_NAME_GCP_PROJECT_ID": "PROD_GCP_PROJECT_ID"
+                "GCP_PROJECT_ID": "codee-club"
               },
               "develop": {
                 "SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY": "DEV_GCP_SERVICE_ACCOUNT_KEY",
-                "SECRET_NAME_GCP_PROJECT_ID": "DEV_GCP_PROJECT_ID"
+                "GCP_PROJECT_ID": "codee-club-dev"
+              },
+              "*": {
+                "GCP_PROJECT_ID": "codee-club-emu"
               }
             }
 
@@ -53,8 +56,8 @@ jobs:
         with:
           push: true
           tags: |
-            gcr.io/${{ secrets[env.SECRET_NAME_GCP_PROJECT_ID] }}/runner-piston:latest
-            gcr.io/${{ secrets[env.SECRET_NAME_GCP_PROJECT_ID] }}/runner-piston:${{ github.run_number }}
+            gcr.io/${{ env.GCP_PROJECT_ID }}/runner-piston:latest
+            gcr.io/${{ env.GCP_PROJECT_ID }}/runner-piston:${{ github.run_number }}
 
       - name: 'Deploy: Wait at turnstile'
         uses: softprops/turnstyle@v1
@@ -67,4 +70,4 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@main
         with:
           service: runner-piston
-          image: gcr.io/${{ secrets[env.SECRET_NAME_GCP_PROJECT_ID] }}/runner-piston:${{ github.run_number }}
+          image: gcr.io/${{ env.GCP_PROJECT_ID }}/runner-piston:${{ github.run_number }}
