@@ -35,7 +35,7 @@ async function main(args) {
     try {
         await pkg.install()
     } catch (e) {
-        logger.error(`Error while installing package ${pkg.language}-${pkg.version}:`, e.message)
+        logger.error(`Error while installing package ${language}-${version}:`, e.message)
     }
 }
 
