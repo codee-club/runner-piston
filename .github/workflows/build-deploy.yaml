@@ -27,14 +27,19 @@ jobs:
             {
               "master": {
                 "SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY": "PROD_GCP_SERVICE_ACCOUNT_KEY",
-                "GCP_PROJECT_ID": "codee-club"
+                "GCP_PROJECT_ID": "codee-club",
+                "GCP_REGION": "us-central1",
+                "CLOUD_RUN_SERVICE_ACCOUNT": "cloudrun-runner@codee-club.iam.gserviceaccount.com"
               },
               "develop": {
                 "SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY": "DEV_GCP_SERVICE_ACCOUNT_KEY",
-                "GCP_PROJECT_ID": "codee-club-dev"
+                "GCP_PROJECT_ID": "codee-club-dev",
+                "GCP_REGION": "asia-southeast2",
+                "CLOUD_RUN_SERVICE_ACCOUNT": "cloudrun-runner@codee-club-dev.iam.gserviceaccount.com"
               },
               "*": {
-                "GCP_PROJECT_ID": "codee-club-emu"
+                "GCP_PROJECT_ID": "codee-club-emu",
+                "GCP_REGION": "asia-southeast2"
               }
             }
 
@@ -67,7 +72,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Deploy: Push to Cloud Run'
-        uses: google-github-actions/deploy-cloudrun@main
-        with:
-          service: runner-piston
-          image: gcr.io/${{ env.GCP_PROJECT_ID }}/runner-piston:${{ github.run_number }}
+        run: |-
+          gcloud run deploy runner-piston \
+            --region ${{ env.GCP_REGION }} \
+            --image gcr.io/${{ env.GCP_PROJECT_ID }}/runner-piston \
+            --port 2000 \
+            --platform managed \
+            --service-account ${{ env.CLOUD_RUN_SERVICE_ACCOUNT }}
+        # uses: google-github-actions/deploy-cloudrun@main
+        # with:
+        #   service: runner-piston
+        #   image: gcr.io/${{ env.GCP_PROJECT_ID }}/runner-piston:${{ github.run_number }}
