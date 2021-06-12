@@ -40,12 +40,14 @@ router.post('/:slug', (req, res) => {
 async function runAll (language, version, req, res) {
     const rt = runtime.get_latest_runtime_matching_language_version(language, version)
     if (rt === undefined) {
+        logger.warn(`${language} ${version} runtime not found`)
         res.status(400).send({ error: `${language} ${version} runtime not found` })
         return
     }
 
     const { inputs, sourceRefs } = req.body
     if (sourceRefs === undefined || sourceRefs.length === 0 || inputs === undefined || Object.keys(inputs).length === 0) {
+        logger.warn('Missing inputs or source files')
         res.status(400).json({ error: 'Missing inputs or source files' })
         return
     }
@@ -54,21 +56,45 @@ async function runAll (language, version, req, res) {
     let files
     try {
         files = await Promise.all(sourceRefs.map((file) => download(file)))
-    } catch (err) {
-        console.log(err)
+    } catch (error) {
+        logger.error('Download source files failed:', error.message)
         res.status(400).json({ error: 'Unable to download source files' })
         return
     }
 
     // Run job for each input
     let outputs = {}
+    let errorOrInvalid = {}
     for (const inputId of Object.keys(inputs)) {
         const result = await runSingle({ runtime: rt, alias: language, files, stdin: inputs[inputId] })
-        console.log(result)
-        outputs[inputId] = { output: result.run.stdout, error: result.run.stderr } // TODO
+        
+        // Breaking cases
+        if (!result.run) {
+            // Runner failure (unexpected response)
+            errorOrInvalid.error = result.failure || 'Unknown run failure'
+            break
+        } else if (
+                result.run.stderr && (
+                    result.run.stderr.includes('compilation failed') || // Java
+                    result.run.stderr.startsWith('error: can\'t find main') // Java
+                )) {
+            // Compile failure
+            errorOrInvalid.invalid = result.run.stderr
+            break
+        }
+        
+        // Non-breaking cases
+        if (result.run.stderr || result.run.signal || result.run.code) {
+            const error = result.run.stderr || 
+                (result.run.signal === 'SIGKILL' ? 'Timeout' : `Code ${result.run.code} Signal ${result.run.signal}`)
+            outputs[inputId] = { error, output: result.run.stdout }
+        } else {
+            // Happy case
+            outputs[inputId] = { output: result.run.stdout }
+        }
     }
 
-    res.status(200).send({ outputs })
+    res.json(Object.keys(errorOrInvalid).length > 0 ? errorOrInvalid : { outputs })
 }
 
 async function runSingle(jobParams) {
@@ -76,7 +102,7 @@ async function runSingle(jobParams) {
         ...jobParams,
         args: [],
         timeouts: {
-            run: 3000,
+            run: 10000,
             compile: 10000,
         },
         memory_limits: {
@@ -84,9 +110,19 @@ async function runSingle(jobParams) {
             compile: config.compile_memory_limit,
         }
     })
-    await job.prime()
-    const result = await job.execute()
-    await job.cleanup()
+    try {
+        await job.prime()
+    } catch (error) {
+        logger.error('Prime failed:', error.message)
+        return { failure: `Prime failed: ${error.message}`}
+    }
+    const result = await job.execute().catch(error => {
+        logger.error('Execute failed:', error.message)
+        return { failure: `Execute failed: ${error.message}`}
+    })
+    await job.cleanup().catch(error => {
+        logger.warn('Cleanup failed:', error.message)
+    })
     return result
 }
 

@@ -52,11 +52,6 @@ jobs:
 
       - name: "Setup: Login to Google Container Registry"
         run: gcloud auth configure-docker
-        # uses: docker/login-action@v1
-        # with:
-        #   registry: gcr.io
-        #   username: _json_key
-        #   password: ${{ secrets[env.SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY] }}
 
       - name: "Build: Build image and push to GCR"
         uses: docker/build-push-action@v2
@@ -81,7 +76,3 @@ jobs:
             --port 2000 \
             --service-account ${{ env.CLOUD_RUN_SERVICE_ACCOUNT }} \
             --platform managed
-        # uses: google-github-actions/deploy-cloudrun@main
-        # with:
-        #   service: runner-piston
-        #   image: gcr.io/${{ env.GCP_PROJECT_ID }}/runner-piston:${{ github.run_number }}
