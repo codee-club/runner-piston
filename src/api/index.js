@@ -51,7 +51,7 @@ async function runAll (language, version, req, res) {
         res.status(400).json({ error: 'Missing inputs or source files' })
         return
     }
-
+    
     // Download source files
     let files
     try {
@@ -61,16 +61,18 @@ async function runAll (language, version, req, res) {
         res.status(400).json({ error: 'Unable to download source files' })
         return
     }
+    logger.debug('Source files downloaded')
 
     // Run job for each input
     let outputs = {}
     let errorOrInvalid = {}
     for (const inputId of Object.keys(inputs)) {
         const result = await runSingle({ runtime: rt, alias: language, files, stdin: inputs[inputId] })
-        
+        logger.debug('Result received')
+
         // Breaking cases
         if (!result.run) {
-            // Runner failure (unexpected response)
+            logger.debug('Result is breaking error case: runner failure (unexpected response)')
             errorOrInvalid.error = result.failure || 'Unknown run failure'
             break
         } else if (
@@ -78,18 +80,20 @@ async function runAll (language, version, req, res) {
                     result.run.stderr.includes('compilation failed') || // Java
                     result.run.stderr.startsWith('error: can\'t find main') // Java
                 )) {
-            // Compile failure
+            logger.debug('Result is breaking error case: compile failure')
             errorOrInvalid.invalid = result.run.stderr
             break
         }
         
         // Non-breaking cases
         if (result.run.stderr || result.run.signal || result.run.code) {
+            logger.debug('Result is non-breaking error case: ' + JSON.stringify(result.run))
             const error = result.run.stderr || 
                 (result.run.signal === 'SIGKILL' ? 'Timeout' : `Code ${result.run.code} Signal ${result.run.signal}`)
             outputs[inputId] = { error, output: result.run.stdout }
         } else {
             // Happy case
+            logger.debug('Result is success case: ' + JSON.stringify(result.run))
             outputs[inputId] = { output: result.run.stdout }
         }
     }
