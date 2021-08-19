@@ -107,7 +107,7 @@ async function runSingle(jobParams) {
         args: [],
         timeouts: {
             run: 10000,
-            compile: 10000,
+            compile: 20000,
         },
         memory_limits: {
             run: config.run_memory_limit,
