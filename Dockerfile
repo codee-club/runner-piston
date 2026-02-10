@@ -19,7 +19,6 @@ RUN node src/install-package.js python 3.9.4
 RUN node src/install-package.js php 8.0.2
 RUN node src/install-package.js dart 2.12.1
 RUN node src/install-package.js go 1.16.2
-RUN node src/install-package.js haskel 9.0.1
 RUN node src/install-package.js node 18.15.0
 RUN node src/install-package.js typescript 5.0.3
 RUN node src/install-package.js ruby 3.0.1
