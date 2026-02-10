@@ -42,13 +42,14 @@ jobs:
                 "GCP_REGION": "asia-southeast2"
               }
             }
-
-      - name: 'Setup: Google Cloud SDK'
-        uses: google-github-actions/setup-gcloud@master
+      - name: 'Setup: Google Cloud Auth'
+        uses: google-github-actions/auth@v2
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets[env.SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY] }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets[env.SECRET_NAME_GCP_SERVICE_ACCOUNT_KEY] }}
+
+      - name: 'Setup: Google Cloud SDK'
+        uses: google-github-actions/setup-gcloud@v1
 
       - name: "Setup: Login to Google Container Registry"
         run: gcloud auth configure-docker
