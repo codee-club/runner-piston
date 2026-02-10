@@ -24,5 +24,5 @@ RUN node src/install-package.js typescript 5.0.3
 RUN node src/install-package.js ruby 3.0.1
 RUN node src/install-package.js rust 1.68.2
 RUN node src/install-package.js bash 5.2.0
-RUN node src/install-package.js brainfuck 2.7.3
-RUN node src/install-package.js emojicode 1.0.2
+RUN node src/install-package.js elixir 1.11.3
+RUN node src/install-package.js lua 5.4.4
